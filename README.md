@@ -12,7 +12,7 @@ visualstudio
 
 # Snippet Tool for Visual Studio 2026
 
-### XML Documentation and Snippet Generation Tool.
+### XML Documentation and Code Snippet Toolkit for Visual Studio.
 
 ------------------
 
