@@ -18,14 +18,6 @@ visualstudio
 
 ## 👌 Features
 
- - Automate the insertion of common XML documentation tags.
- - Automate .snippet file generation from selected text.
- - Compatible with C-Sharp and VB.NET syntax.
- - Menu commands can be invoked using shortcut hotkeys, for example by pressing CTRL+E+R, the selected text will be wrapped into the cref tag (<see cref="value"/>).
-
-
-## Features
-
 - Automates the insertion of common XML documentation tags directly from the code editor context menu or via keyboard shortcuts:
   - Wraps selected text in reference tags: `<see cref=""/>`, `<paramref name=""/>`, `<see langword=""/>`.
   - Wraps selected text in hyperlink tags: `<see href=""/>`, `<seealso href=""/>`.
