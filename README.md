@@ -71,7 +71,7 @@ visualstudio
 
 ## 🤖 Getting Started
 
-Download the latest release by clicking [here](https://github.com/ElektroStudios/Snippet-Tool-And-Documentation-for-Visual-Studio/releases/latest).
+Download the latest release by clicking [here](https://github.com/ElektroStudios/XML-Doc-and-Snippet-Tool-for-VS2026/releases/latest).
 
 You can also download it from Visual Studio Market Place by clicking [here](https://marketplace.visualstudio.com/items?itemName=elektroHacker.SnippetToolVS2026).
 
@@ -85,7 +85,7 @@ This Work (the repository and the content provided in) is provided "as is", with
 
 ## 💪 Contributing
 
-Your contribution is highly appreciated!. If you have any ideas, suggestions, or encounter issues, feel free to open an issue by clicking [here](https://github.com/ElektroStudios/Snippet-Tool-And-Documentation-for-Visual-Studio/issues/new/choose). 
+Your contribution is highly appreciated!. If you have any ideas, suggestions, or encounter issues, feel free to open an issue by clicking [here](https://github.com/ElektroStudios/XML-Doc-and-Snippet-Tool-for-VS2026/issues/new/choose). 
 
 Your input helps make this Work better for everyone. Thank you for your support! 🚀
 
