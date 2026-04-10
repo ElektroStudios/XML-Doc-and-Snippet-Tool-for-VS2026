@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="Snippet_Tool_2026.2282e2f5-6732-4068-a2b0-e558c5249a06" Version="1.0" Language="en-US" Publisher="Company" />
+        <Identity Id="Snippet_Tool_2026.2282e2f5-6732-4068-a2b0-e558c5249a06" Version="1.0" Language="en-US" Publisher="ElektroStudios" />
         <DisplayName>Snippet Tool (VS2026)</DisplayName>
         <Description xml:space="preserve">XML Documentation and Code Snippet Toolkit for Visual Studio.</Description>
         <MoreInfo>https://github.com/ElektroStudios/XML-Doc-and-Snippet-Tool-for-VS2026</MoreInfo>
