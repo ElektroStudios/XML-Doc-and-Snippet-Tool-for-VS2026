@@ -14,7 +14,10 @@ visualstudio
 
 ### XML Documentation and Code Snippet Toolkit for Visual Studio.
 
+Looking for the Visual Studio 2022 version? Find it [here](https://github.com/ElektroStudios/Snippet-Tool-And-Documentation-for-Visual-Studio).
+
 ------------------
+
 
 ## 👌 Features
 
