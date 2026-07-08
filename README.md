@@ -1,4 +1,4 @@
-<!-- Common Project Tags:
+﻿<!-- Common Project Tags:
 dotnet 
 dotnet-core 
 netcore 
