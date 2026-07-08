@@ -52,6 +52,9 @@ visualstudio
 
 ------------------
 
+## 👋 Introduction
+
+**Snippet Tool for Visual Studio 2026** is a functional extension designed to stop the manual grunt work of writing XML documentation and managing code snippets. If you are tired of typing out tags like `<see cref=""/>` or `<paramref name=""/>` every single time, or if you need a quick way to turn a piece of code into a reusable `.snippet` file, this tool handles it for you. It integrates directly into the editor context menu, giving you a set of fast commands to format, document, and manage your source code without breaking your flow.
 
 ## 🤖 Features
 
