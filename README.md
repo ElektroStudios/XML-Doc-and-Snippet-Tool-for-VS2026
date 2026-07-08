@@ -10,15 +10,12 @@ vbnet
 visualstudio 
  -->
 
-Looking for the Visual Studio 2022 version? Find it [here](https://github.com/ElektroStudios/Snippet-Tool-And-Documentation-for-Visual-Studio).
-
-
 <div align="center">
   <img src="/Images/App.ico" width="100" alt="Logo">
   
   <h1>Snippet Tool for Visual Studio 2026</h1>
 
-### A comprehensive XML Documentation and Code Snippet toolkit extension for Visual Studio
+### A comprehensive XML Documentation and Code Snippet toolkit extension for Visual Studio.
 
 <p>👀 Looking for the Visual Studio 2019 or 2022 version? Find it <a href="https://github.com/ElektroStudios/Snippet-Tool-And-Documentation-for-Visual-Studio">here</a>.</p>
 
