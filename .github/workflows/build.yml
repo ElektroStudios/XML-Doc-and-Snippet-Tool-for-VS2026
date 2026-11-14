@@ -47,6 +47,10 @@ jobs:
         run: |
           New-Item -Path ${{ runner.temp }}\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner
+      - name: Set up the .NET 10 SDK for the net48 test project
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2.0.0
       - name: Build and analyze
@@ -57,5 +61,5 @@ jobs:
           dotnet nuget locals all --clear
           & "${{ runner.temp }}\scanner\dotnet-sonarscanner" begin /k:"${{ env.SONAR_PROJECT_KEY }}" /o:"${{ env.SONAR_ORGANIZATION }}" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.sourceEncoding=UTF-8 /d:sonar.exclusions="**/*.png,**/*.ico,**/*.jpg,**/*.jpeg,**/*.gif,**/*.webp,**/*.bmp,**/*.tif,**/*.tiff,**/*.rtf,**/*.html,**/*.htm,**/*.resx,**/*.yml,**/*.myapp,**/*.sample,**/*.settings,**/*.conf,**/*.md,**/*.bin,**/*.sln,**/*.slnx,**/*.zip,**/*.rar,**/*.rev,**/*.idx,**/*.nfo,**/*.gitattributes,**/*.gitignore,**/.github/**/*"
           nuget restore "Source\${{ env.SOLUTION_NAME }}.${{ env.SOLUTION_EXT }}"
-          msbuild "Source\${{ env.SOLUTION_NAME }}.${{ env.SOLUTION_EXT }}" -p:Configuration=Release
+          msbuild "Source\${{ env.SOLUTION_NAME }}.${{ env.SOLUTION_EXT }}" /p:Configuration=Release /p:GenerateResourceUsePreserializedResources=false
           & "${{ runner.temp }}\scanner\dotnet-sonarscanner" end /d:sonar.token="$env:SONAR_TOKEN"

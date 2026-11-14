@@ -78,7 +78,7 @@ Namespace MyPackage.Core
 
         {1}
 
-        ]]$cdataend$</a>
+        ]]$cdataend$</Code>
           </Snippet>
          </CodeSnippet>
         </CodeSnippets>]]></a>.Value
@@ -126,7 +126,7 @@ Namespace MyPackage.Core
 
         {1}
 
-        ]]$cdataend$</a>
+        ]]$cdataend$</Code>
           </Snippet>
          </CodeSnippet>
         </CodeSnippets>]]></a>.Value

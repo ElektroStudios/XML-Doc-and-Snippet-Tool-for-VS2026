@@ -58,7 +58,6 @@ Imports Task = System.Threading.Tasks.Task
 ''' To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
 ''' </para>
 ''' </remarks>
-<InstalledProductRegistration("#110", "#112", "1.6", IconResourceID:=400)>
 <ProvideMenuResource("Menus.ctmenu", 1)>
 <ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)>
 <Guid(Guids.PackageGuid)>
@@ -81,6 +80,9 @@ Public NotInheritable Class Snippet_Tool_2026Package : Inherits AsyncPackage
     ''' to initialize <see cref="Snippet_Tool_2026Package.Dte"/> when the IDE is not yet fully loaded.
     ''' </summary>
     Friend DteInitializer As DteInitializer
+
+    ''' <summary>Indicates whether all menu handlers have been registered on the UI thread.</summary>
+    Private menuHandlersInitialized As Boolean
 
 #End Region
 
@@ -311,7 +313,12 @@ Public NotInheritable Class Snippet_Tool_2026Package : Inherits AsyncPackage
                     Sub()
                         Logger.Info("DteInitializer callback fired — retrying InitializeDteAsync")
                         Dim pendingInit As JoinableTask = Me.JoinableTaskFactory.RunAsync(
-                            Function() Me.InitializeDteAsync(cancellationToken))
+                            Async Function()
+                                Await Me.InitializeDteAsync(cancellationToken).ConfigureAwait(False)
+                                If Snippet_Tool_2026Package.Dte IsNot Nothing Then
+                                    Await Me.InitializeMenuHandlersAsync().ConfigureAwait(False)
+                                End If
+                            End Function)
                     End Sub)
                 Logger.Debug("DteInitializer registered successfully")
             Else
@@ -338,6 +345,7 @@ Public NotInheritable Class Snippet_Tool_2026Package : Inherits AsyncPackage
         Logger.Debug("Switching to main thread...")
         Await Me.JoinableTaskFactory.SwitchToMainThreadAsync()
         Logger.Debug("Now on main thread")
+        If Me.menuHandlersInitialized Then Return
 
         Logger.Debug("Requesting OleMenuCommandService...")
         Dim mcs As OleMenuCommandService =
@@ -357,6 +365,10 @@ Public NotInheritable Class Snippet_Tool_2026Package : Inherits AsyncPackage
         Else
             Logger.Info("OleMenuCommandService obtained on first attempt")
         End If
+
+        ' Recheck after service acquisition, which may yield to another initialization request.
+        Await Me.JoinableTaskFactory.SwitchToMainThreadAsync()
+        If Me.menuHandlersInitialized Then Return
 
         ' Section: references 
         Logger.Debug("Registering References section commands...")
@@ -388,6 +400,7 @@ Public NotInheritable Class Snippet_Tool_2026Package : Inherits AsyncPackage
         Me.CmdDeleteXmlComments = Snippet_Tool_2026Package.CreateAndRegister(mcs, AddressOf Me.CmdDeleteXmlComments_Callback, Guids.CmdGroupEditorOperations, CommandIds.DeleteXmlComments)
         Logger.Info("Editor Operations commands registered (CollapseXmlComments, ExpandXmlComments, DeleteXmlComments)")
 
+        Me.menuHandlersInitialized = True
         Logger.Info($"InitializeMenuHandlersAsync — END — total commands registered: 18")
 
     End Function

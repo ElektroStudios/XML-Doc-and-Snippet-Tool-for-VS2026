@@ -1,0 +1,39 @@
+name: xUnit v3 tests and .NET Framework compilation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Run xUnit v3 tests on .NET Framework 4.8
+        run: dotnet test "Source/Snippet Tool 2026.Tests/Snippet Tool 2026.Tests.vbproj" --configuration Release --logger trx --results-directory TestResults
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: net48-test-results
+          path: TestResults/**/*.trx
+          if-no-files-found: warn
+
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Compile the net48 test project with warnings treated as errors
+        run: dotnet build "Source/Snippet Tool 2026.Tests/Snippet Tool 2026.Tests.vbproj" --configuration Release --warnaserror
+      - name: Compile all extension sources against .NET Framework 4.8
+        run: dotnet build "Source/Snippet Tool 2026.CompileCheck/Snippet Tool 2026.CompileCheck.vbproj" --configuration Release

@@ -67,6 +67,7 @@
     <Compile Include="helpers\DTE Initializer.vb" />
     <Compile Include="helpers\Text Editor Helper.vb" />
     <Compile Include="helpers\XmlDocOperationExecutor.vb" />
+    <Compile Include="helpers\XmlDocumentationFormatting.vb" />
     <Compile Include="helpers\Logger.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="core\Package Guids.vb" />
@@ -83,10 +84,11 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Design" />
+    <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" ExcludeAssets="runtime">
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="18.12.1606" ExcludeAssets="runtime">
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>

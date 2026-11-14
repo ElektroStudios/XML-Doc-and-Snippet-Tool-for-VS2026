@@ -18,7 +18,6 @@ Imports System.Collections.Generic
 Imports System.IO
 Imports System.Linq
 Imports System.Text
-Imports System.Threading
 
 Imports EnvDTE
 
@@ -226,7 +225,7 @@ Namespace MyPackage.Helpers
             Logger.Debug($"Perform_WrapAsCodeRef — span length: {span.Length} chars, text: '{span.GetText()}'")
 
             ' Perform the replacement.
-            span.Snapshot.TextBuffer.Replace(span, String.Format("<see cref=""{0}""/>", span.GetText()))
+            span.Snapshot.TextBuffer.Replace(span, XmlDocumentationFormatting.WrapAttribute("see", "cref", span.GetText()))
             Logger.Info($"Perform_WrapAsCodeRef — selection wrapped in <see cref> tag")
 
             Logger.Debug("Perform_WrapAsCodeRef — END")
@@ -255,7 +254,7 @@ Namespace MyPackage.Helpers
             Logger.Debug($"Perform_WrapAsParamRef — span length: {span.Length} chars, text: '{span.GetText()}'")
 
             ' Perform the replacement.
-            span.Snapshot.TextBuffer.Replace(span, String.Format("<paramref name=""{0}""/>", span.GetText()))
+            span.Snapshot.TextBuffer.Replace(span, XmlDocumentationFormatting.WrapAttribute("paramref", "name", span.GetText()))
             Logger.Info($"Perform_WrapAsParamRef — selection wrapped in <paramref name> tag")
 
             Logger.Debug("Perform_WrapAsParamRef — END")
@@ -284,7 +283,7 @@ Namespace MyPackage.Helpers
             Logger.Debug($"Perform_WrapAsLangRef — span length: {span.Length} chars, text: '{span.GetText()}'")
 
             ' Perform the replacement.
-            span.Snapshot.TextBuffer.Replace(span, String.Format("<see langword=""{0}""/>", span.GetText()))
+            span.Snapshot.TextBuffer.Replace(span, XmlDocumentationFormatting.WrapAttribute("see", "langword", span.GetText()))
             Logger.Info($"Perform_WrapAsLangRef — selection wrapped in <see langword> tag")
 
             Logger.Debug("Perform_WrapAsLangRef — END")
@@ -311,7 +310,7 @@ Namespace MyPackage.Helpers
             Logger.Debug($"Perform_WrapAsHrefLink — span length: {span.Length} chars, text: '{span.GetText()}'")
 
             ' Perform the replacement.
-            span.Snapshot.TextBuffer.Replace(span, String.Format("<see href=""{0}""/>", span.GetText()))
+            span.Snapshot.TextBuffer.Replace(span, XmlDocumentationFormatting.WrapAttribute("see", "href", span.GetText()))
             Logger.Info("Perform_WrapAsHrefLink — selection wrapped in <see href> tag")
 
             Logger.Debug("Perform_WrapAsHrefLink — END")
@@ -334,7 +333,7 @@ Namespace MyPackage.Helpers
             Logger.Debug($"Perform_WrapAsSeeAlsoLink — span length: {span.Length} chars, text: '{span.GetText()}'")
 
             ' Perform the replacement.
-            span.Snapshot.TextBuffer.Replace(span, String.Format("<seealso href=""{0}""/>", span.GetText()))
+            span.Snapshot.TextBuffer.Replace(span, XmlDocumentationFormatting.WrapAttribute("seealso", "href", span.GetText()))
             Logger.Info($"Perform_WrapAsSeeAlsoLink — selection wrapped in <seealso> tag")
 
             Logger.Debug("Perform_WrapAsSeeAlsoLink — END")
@@ -361,7 +360,7 @@ Namespace MyPackage.Helpers
             Logger.Debug($"Perform_WrapAsInlineCode — span length: {span.Length} chars")
 
             ' Perform the replacement.
-            span.Snapshot.TextBuffer.Replace(span, String.Format("<c>{0}</c>", span.GetText()))
+            span.Snapshot.TextBuffer.Replace(span, XmlDocumentationFormatting.WrapElement("c", span.GetText()))
             Logger.Info("Perform_WrapAsInlineCode — selection wrapped in <c> tags")
 
             Logger.Debug("Perform_WrapAsInlineCode — END")
@@ -388,7 +387,7 @@ Namespace MyPackage.Helpers
                 Logger.Debug($"Perform_WrapAsMultilineCode — span length: {span.Length} chars")
 
                 ' Perform the replacement.
-                span.Snapshot.TextBuffer.Replace(span, String.Format("<code>{0}</code>", span.GetText()))
+                span.Snapshot.TextBuffer.Replace(span, XmlDocumentationFormatting.WrapElement("code", span.GetText()))
                 Logger.Info("Perform_WrapAsMultilineCode — selection wrapped in <code> tags")
 
                 Snippet_Tool_2026Package.Dte.UndoContext.Close()
@@ -428,7 +427,7 @@ Namespace MyPackage.Helpers
 
                 ' Get the lines that contain the start and end points.
                 Dim startLine As ITextViewLine = selection.TextView.GetTextViewLineContainingBufferPosition(start.Position)
-                Dim endLine As ITextViewLine = selection.TextView.GetTextViewLineContainingBufferPosition([end].Position.Subtract(1))
+                Dim endLine As ITextViewLine = selection.TextView.GetTextViewLineContainingBufferPosition(New SnapshotPoint(start.Position.Snapshot, XmlDocumentationFormatting.GetSelectionEndPosition(start.Position.Position, [end].Position.Position)))
 
                 ' Get the start and end points of the lines.
                 Dim startLinePoint As SnapshotPoint = startLine.Start
@@ -438,47 +437,8 @@ Namespace MyPackage.Helpers
                 Dim span As New SnapshotSpan(startLinePoint, endLinePoint)
                 Logger.Debug($"Perform_WrapAsCodeExample — span length: {span.Length} chars")
 
-                ' Compute margin.
-                Dim lines As IEnumerable(Of String) =
-            span.GetText.Split(New String() {Environment.NewLine}, StringSplitOptions.None) '.SkipWhile(Function(line As String) String.IsNullOrWhiteSpace(line))
-
-                Logger.Debug($"Perform_WrapAsCodeExample — selection spans {lines.Count} line(s)")
-
-                Dim margin As Integer =
-                    lines.Where(Function(line As String) Not String.IsNullOrWhiteSpace(line)).
-                          Select(Function(line)
-                                     Dim count As Integer = 0
-                                     While Char.IsWhiteSpace(line(Math.Max(Interlocked.Increment(count), count - 1)))
-                                     End While
-                                     Return Interlocked.Decrement(count)
-                                 End Function).Min
-
-                Logger.Debug($"Perform_WrapAsCodeExample — computed margin: {margin}")
-
-                Dim sb As New StringBuilder
-
-                With sb
-                    .AppendLine(String.Format("{0} <example> This is a code example.", xmlCommentChars))
-                    .AppendLine(String.Format("{0} <code language=""{1}"">", xmlCommentChars, codeLang))
-
-                    For Each line As String In lines
-
-                        If String.IsNullOrWhiteSpace(line) Then
-                            sb.AppendLine(New String(" "c, margin) & String.Format("{0} ", xmlCommentChars))
-                        Else
-                            sb.AppendLine(String.Format("{0}{1}{2}{3}", New String(" "c, margin), xmlCommentChars, If(margin = 0, " ", ""), line.Remove(0, margin)))
-                        End If
-
-                    Next line
-
-                    .AppendLine(String.Format("{0} </code>", xmlCommentChars))
-                    .AppendLine(String.Format("{0} </example>", xmlCommentChars))
-                End With
-
-                Logger.Debug($"Perform_WrapAsCodeExample — built code example block, total length: {sb.Length} chars")
-
-                ' Perform the replacement.
-                span.Snapshot.TextBuffer.Replace(span, sb.ToString)
+                Dim replacement As String = XmlDocumentationFormatting.FormatCodeExample(span.GetText(), xmlCommentChars, codeLang)
+                span.Snapshot.TextBuffer.Replace(span, replacement)
                 Logger.Info("Perform_WrapAsCodeExample — selection wrapped in code example block")
 
                 Snippet_Tool_2026Package.Dte.UndoContext.Close()
@@ -518,7 +478,7 @@ Namespace MyPackage.Helpers
             Logger.Debug($"Perform_WrapAsBold — span length: {span.Length} chars")
 
             ' Perform the replacement.
-            span.Snapshot.TextBuffer.Replace(span, String.Format("<b>{0}</b>", span.GetText()))
+            span.Snapshot.TextBuffer.Replace(span, XmlDocumentationFormatting.WrapDocumentationFragment("b", span.GetText()))
             Logger.Info("Perform_WrapAsBold — selection wrapped in <b> tags")
 
             Logger.Debug("Perform_WrapAsBold — END")
@@ -547,7 +507,7 @@ Namespace MyPackage.Helpers
             Logger.Debug($"Perform_WrapAsItalic — span length: {span.Length} chars")
 
             ' Perform the replacement.
-            span.Snapshot.TextBuffer.Replace(span, String.Format("<i>{0}</i>", span.GetText()))
+            span.Snapshot.TextBuffer.Replace(span, XmlDocumentationFormatting.WrapDocumentationFragment("i", span.GetText()))
             Logger.Info("Perform_WrapAsItalic — selection wrapped in <i> tags")
 
             Logger.Debug("Perform_WrapAsItalic — END")
@@ -576,7 +536,7 @@ Namespace MyPackage.Helpers
             Logger.Debug($"Perform_WrapAsUnderline — span length: {span.Length} chars")
 
             ' Perform the replacement.
-            span.Snapshot.TextBuffer.Replace(span, String.Format("<u>{0}</u>", span.GetText()))
+            span.Snapshot.TextBuffer.Replace(span, XmlDocumentationFormatting.WrapDocumentationFragment("u", span.GetText()))
             Logger.Info("Perform_WrapAsUnderline — selection wrapped in <u> tags")
 
             Logger.Debug("Perform_WrapAsUnderline — END")
@@ -607,7 +567,7 @@ Namespace MyPackage.Helpers
                     Logger.Debug($"Perform_WrapAsParagraph — span length: {span.Length} chars")
 
                     ' Perform the replacement.
-                    span.Snapshot.TextBuffer.Replace(span, String.Format("<para>{0}</para>", span.GetText()))
+                    span.Snapshot.TextBuffer.Replace(span, XmlDocumentationFormatting.WrapDocumentationFragment("para", span.GetText()))
                     Logger.Info("Perform_WrapAsParagraph — selection wrapped in <para> tags")
 
                 Else
@@ -683,44 +643,8 @@ Namespace MyPackage.Helpers
                         ' Create a SnapshotSpan for all text to be replaced.
                         Dim span As SnapshotSpan = selection.StreamSelectionSpan.SnapshotSpan
 
-                        Dim lines As IEnumerable(Of String) =
-                    span.GetText.Split(New String() {Environment.NewLine}, StringSplitOptions.None)
-
-                        Logger.Debug($"Perform_WrapAsRemarks — selection spans {lines.Count} line(s)")
-
-                        ' Compute margin.
-                        Dim margin As Integer = lines.
-                               Where(Function(line As String) Not String.IsNullOrWhiteSpace(line)).
-                               Select(Function(line)
-                                          Dim count As Integer = 0
-                                          While Char.IsWhiteSpace(line(Math.Max(Interlocked.Increment(count), count - 1)))
-                                          End While
-                                          Return Interlocked.Decrement(count)
-                                      End Function).Min
-
-                        Logger.Debug($"Perform_WrapAsRemarks — computed margin: {margin}")
-
-                        Dim sb As New StringBuilder
-                        With sb
-                            .AppendLine(String.Format("{0} <remarks>", xmlCommentChars))
-
-                            For Each line As String In lines
-
-                                If String.IsNullOrWhiteSpace(line) Then
-                                    sb.AppendLine(New String(" "c, margin) & String.Format("{0} ", xmlCommentChars))
-                                Else
-                                    sb.AppendLine(String.Format("{0}{1}{2}{3}", New String(" "c, margin), xmlCommentChars, If(margin = 0, " ", ""), line.Remove(0, margin)))
-                                End If
-
-                            Next line
-
-                            .AppendLine(String.Format("{0} </remarks>", xmlCommentChars))
-                        End With
-
-                        Logger.Debug($"Perform_WrapAsRemarks — built remarks block, total length: {sb.Length} chars")
-
-                        ' Perform the replacement.
-                        span.Snapshot.TextBuffer.Replace(span, sb.ToString)
+                        Dim replacement As String = XmlDocumentationFormatting.FormatRemarks(span.GetText(), xmlCommentChars)
+                        span.Snapshot.TextBuffer.Replace(span, replacement)
                         Logger.Info("Perform_WrapAsRemarks — selection wrapped in remarks block")
 
                 End Select
@@ -788,7 +712,7 @@ Namespace MyPackage.Helpers
 
                         ' Get the lines that contain the start and end points.
                         Dim startLine As ITextViewLine = selection.TextView.GetTextViewLineContainingBufferPosition(start.Position)
-                        Dim endLine As ITextViewLine = selection.TextView.GetTextViewLineContainingBufferPosition([end].Position.Subtract(1))
+                        Dim endLine As ITextViewLine = selection.TextView.GetTextViewLineContainingBufferPosition(New SnapshotPoint(start.Position.Snapshot, XmlDocumentationFormatting.GetSelectionEndPosition(start.Position.Position, [end].Position.Position)))
 
                         ' Get the start and end points of the lines.
                         Dim startLinePoint As SnapshotPoint = startLine.Start
@@ -797,19 +721,12 @@ Namespace MyPackage.Helpers
                         ' Create a SnapshotSpan for all text to be replaced.
                         Dim span As New SnapshotSpan(startLinePoint, endLinePoint)
 
-                        Dim lines As IEnumerable(Of String) = span.GetText.Split(New String() {Environment.NewLine}, StringSplitOptions.None)
+                        Dim lines As IEnumerable(Of String) = XmlDocumentationFormatting.SplitLines(span.GetText())
 
                         Logger.Debug($"Perform_InsertSeparatorLine — selection spans {lines.Count} line(s)")
 
                         ' Compute margin.
-                        Dim margin As Integer = lines.
-                               Where(Function(line As String) Not String.IsNullOrWhiteSpace(line)).
-                               Select(Function(line)
-                                          Dim count As Integer = 0
-                                          While Char.IsWhiteSpace(line(Math.Max(Interlocked.Increment(count), count - 1)))
-                                          End While
-                                          Return Interlocked.Decrement(count)
-                                      End Function).Min
+                        Dim margin As Integer = XmlDocumentationFormatting.GetMinimumIndentation(span.GetText())
 
                         Logger.Debug($"Perform_InsertSeparatorLine — computed margin: {margin}")
 
@@ -861,7 +778,7 @@ Namespace MyPackage.Helpers
 
             ' Get the lines that contain the start and end points.
             Dim startLine As ITextViewLine = selection.TextView.GetTextViewLineContainingBufferPosition(start.Position)
-            Dim endLine As ITextViewLine = selection.TextView.GetTextViewLineContainingBufferPosition([end].Position.Subtract(1))
+            Dim endLine As ITextViewLine = selection.TextView.GetTextViewLineContainingBufferPosition(New SnapshotPoint(start.Position.Snapshot, XmlDocumentationFormatting.GetSelectionEndPosition(start.Position.Position, [end].Position.Position)))
 
             ' Get the start and end points of the lines.
             Dim startLinePoint As SnapshotPoint = startLine.Start
@@ -879,11 +796,11 @@ Namespace MyPackage.Helpers
 
                 Case CodeModelLanguageConstants.vsCMLanguageVB
                     Logger.Debug("Perform_GenerateSnippet — applying VB snippet template")
-                    sb.AppendFormat(DocsConstants.SnippetTemplateFormatVB, author, span.GetText()).Replace("$cdataend$", ">")
+                    sb.Append(XmlDocumentationFormatting.FormatSnippet(DocsConstants.SnippetTemplateFormatVB, author, span.GetText()))
 
                 Case CodeModelLanguageConstants.vsCMLanguageCSharp
                     Logger.Debug("Perform_GenerateSnippet — applying CS snippet template")
-                    sb.AppendFormat(DocsConstants.SnippetTemplateFormatCS, author, span.GetText()).Replace("$cdataend$", ">")
+                    sb.Append(XmlDocumentationFormatting.FormatSnippet(DocsConstants.SnippetTemplateFormatCS, author, span.GetText()))
 
                 Case Else
                     Logger.Warn($"Perform_GenerateSnippet — unsupported language '{lang}', snippet template not applied")
@@ -895,10 +812,10 @@ Namespace MyPackage.Helpers
                 Return
             End If
 
-            Dim tempFileName As String = String.Format("{0}.snippet", Path.GetTempFileName)
+            Dim tempFileName As String = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") & ".snippet")
             Logger.Debug($"Perform_GenerateSnippet — writing snippet to temp file: '{tempFileName}'")
 
-            File.WriteAllText(tempFileName, sb.ToString, Encoding.Default)
+            XmlDocumentationFormatting.WriteSnippet(tempFileName, sb.ToString())
             Logger.Info($"Perform_GenerateSnippet — snippet file written ({sb.Length} chars), opening with default handler")
 
             Diagnostics.Process.Start(tempFileName)
